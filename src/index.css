@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-300 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-brand-cream dark:bg-brand-espresso;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-brand-gold/40 rounded-full hover:bg-brand-gold/70 transition-colors duration-200;
+  }
+
+  /* Smooth Focus Outline */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-gold/60;
+  }
+}
+
+@layer components {
+  /* Premium Glassmorphism Panel (Light) */
+  .glass-panel {
+    background: rgba(250, 246, 240, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 
+      0 4px 30px rgba(92, 64, 51, 0.04), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 0 0 1px rgba(212, 163, 115, 0.05);
+  }
+
+  /* Premium Glassmorphism Panel (Dark) */
+  .dark .glass-panel {
+    background: rgba(28, 20, 18, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(92, 64, 51, 0.35);
+    box-shadow: 
+      0 4px 30px rgba(0, 0, 0, 0.25), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 0 0 1px rgba(212, 163, 115, 0.08);
+  }
+
+  /* Glow Card Effects */
+  .glow-hover {
+    @apply transition-all duration-500;
+  }
+  .glow-hover:hover {
+    box-shadow: 
+      0 10px 40px -10px rgba(212, 163, 115, 0.25), 
+      0 0 20px 0 rgba(212, 163, 115, 0.1);
+    transform: translateY(-4px);
+  }
+  
+  .dark .glow-hover:hover {
+    box-shadow: 
+      0 10px 40px -10px rgba(226, 149, 120, 0.15), 
+      0 0 20px 0 rgba(226, 149, 120, 0.08);
+  }
+
+  /* Cinematic Gold Gradient Text */
+  .text-luxury-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-mocha via-brand-gold to-brand-mocha dark:from-brand-cream dark:via-brand-gold dark:to-brand-cream;
+  }
+
+  /* Modern Glass Input Styling */
+  .glass-input {
+    @apply bg-brand-cream/30 dark:bg-brand-espresso/40 border border-brand-mocha/10 dark:border-brand-latte/10 rounded-xl px-4 py-3 text-brand-mocha dark:text-brand-cream backdrop-blur-md focus:border-brand-gold/80 dark:focus:border-brand-gold/80 transition-all duration-300 outline-none;
+  }
+}
+
+/* Floating Soft Particles (Canvas overlay details) */
+.particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hide native scrollbar for carousel but keep functional scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
