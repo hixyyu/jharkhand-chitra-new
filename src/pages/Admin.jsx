@@ -1,12 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductContext';
-import { LogIn, LogOut, Plus, Edit2, Trash2, Home, Check, X, ShieldAlert, Sparkles, FileText, BarChart2, Package } from 'lucide-react';
+import { LogIn, LogOut, Plus, Edit2, Trash2, Home, Check, X, ShieldAlert, Sparkles, FileText, BarChart2, Package, Image, Settings, RefreshCw, UploadCloud, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const customizerSections = [
+  {
+    title: "Cinematic Hero Banner",
+    desc: "Update the core landing video or display image.",
+    fields: [
+      { key: 'hero_video', label: 'Looping Backdrop Video / Image', desc: 'Looping background video (URL or .mp4) or cover image.' },
+      { key: 'hero_fallback_image', label: 'Backdrop Fallback Image', desc: 'Display cover before video playback starts or if video fails to load.' }
+    ]
+  },
+  {
+    title: "Artisanal Narrative (About Us)",
+    desc: "Customize the beautiful overlapping collage elements in the brand history block.",
+    fields: [
+      { key: 'about_primary', label: 'Narrative Primary Photo', desc: 'The large underlying history image block.' },
+      { key: 'about_secondary', label: 'Narrative Detail Accent', desc: 'The smaller overlapping detail photo block.' }
+    ]
+  },
+  {
+    title: "Category Card Previews",
+    desc: "Update the thumbnails shown in the 'Featured Collections' slider grid.",
+    fields: [
+      { key: 'category_clay_charms', label: 'Clay Charms Card', desc: 'Category card image for Clay Charms.' },
+      { key: 'category_keyrings', label: 'Keyrings Card', desc: 'Category card image for Keyrings.' },
+      { key: 'category_dashboard_decor', label: 'Dashboard Decor Card', desc: 'Category card image for Dashboard Decor.' },
+      { key: 'category_earrings', label: 'Earrings Card', desc: 'Category card image for Earrings.' },
+      { key: 'category_custom_pins', label: 'Custom Pins Card', desc: 'Category card image for Custom Pins.' },
+      { key: 'category_flags', label: 'Car & Bike Flags Card', desc: 'Category card image for Car & Bike Flags.' }
+    ]
+  },
+  {
+    title: "Instagram Grid Vibe Showcase",
+    desc: "Tailor the mock Instagram feed post images at the bottom page section.",
+    fields: [
+      { key: 'insta_post_1', label: 'Feed Post #1', desc: 'Mock grid item 1.' },
+      { key: 'insta_post_2', label: 'Feed Post #2', desc: 'Mock grid item 2.' },
+      { key: 'insta_post_3', label: 'Feed Post #3', desc: 'Mock grid item 3.' },
+      { key: 'insta_post_4', label: 'Feed Post #4', desc: 'Mock grid item 4.' },
+      { key: 'insta_post_5', label: 'Feed Post #5', desc: 'Mock grid item 5.' },
+      { key: 'insta_post_6', label: 'Feed Post #6', desc: 'Mock grid item 6.' }
+    ]
+  }
+];
 
 export default function Admin({ onNavigateHome }) {
   const { currentUser, login, logout, loading: authLoading, isMock: authIsMock } = useAuth();
-  const { products, addProduct, updateProduct, deleteProduct, uploadMedia } = useProducts();
+  const { products, addProduct, updateProduct, deleteProduct, uploadMedia, siteImages, updateSiteImages, defaultSiteImages } = useProducts();
+
+  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'customizer'
+  const [customizerImages, setCustomizerImages] = useState({});
+  const [savingCustomizer, setSavingCustomizer] = useState(false);
+  const [uploadingField, setUploadingField] = useState(null);
+
+  // Synchronize local customizer state with global site images
+  useEffect(() => {
+    if (siteImages) {
+      setCustomizerImages(siteImages);
+    }
+  }, [siteImages]);
 
   // Login states
   const [email, setEmail] = useState('');
@@ -51,6 +106,54 @@ export default function Admin({ onNavigateHome }) {
       await logout();
     } catch (err) {
       console.error("Logout failed:", err);
+    }
+  };
+
+  // Customizer Event Handlers
+  const handleCustomizerUrlChange = (key, value) => {
+    setCustomizerImages((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleCustomizerFileChange = async (key, file) => {
+    if (!file) return;
+    setUploadingField(key);
+    try {
+      const url = await uploadMedia(file, 'site');
+      setCustomizerImages((prev) => ({ ...prev, [key]: url }));
+    } catch (err) {
+      console.error("Customizer upload failed:", err);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
+  const handleSaveCustomizer = async () => {
+    setSavingCustomizer(true);
+    try {
+      await updateSiteImages(customizerImages);
+      alert("✨ Excellent! Your custom showcase assets were synchronized globally.");
+    } catch (err) {
+      console.error("Save customizations failed:", err);
+      alert("Failed to save. Check your connection.");
+    } finally {
+      setSavingCustomizer(false);
+    }
+  };
+
+  const handleResetCustomizer = async () => {
+    if (window.confirm("Are you absolutely sure you want to discard all custom image files and reset the showcase to brand default files?")) {
+      setSavingCustomizer(true);
+      try {
+        await updateSiteImages(defaultSiteImages);
+        setCustomizerImages(defaultSiteImages);
+        alert("🔄 Reset completed successfully!");
+      } catch (err) {
+        console.error("Reset failed:", err);
+        alert("Failed to reset.");
+      } finally {
+        setSavingCustomizer(false);
+      }
     }
   };
 
@@ -294,8 +397,36 @@ export default function Admin({ onNavigateHome }) {
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+      {/* Dynamic Tab Switcher */}
+      <div className="max-w-7xl mx-auto flex items-center space-x-4 mb-8 bg-brand-cream/40 dark:bg-brand-cocoa/30 p-1.5 rounded-2xl border border-brand-mocha/5 w-max">
+        <button
+          onClick={() => setActiveTab('catalog')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs uppercase tracking-widest font-bold transition-all duration-300 ${
+            activeTab === 'catalog'
+              ? 'bg-brand-mocha dark:bg-brand-gold text-brand-cream dark:text-brand-mocha shadow-md'
+              : 'text-brand-mocha/65 dark:text-brand-cream/65 hover:bg-brand-sand/50 dark:hover:bg-brand-espresso/50'
+          }`}
+        >
+          <Package size={14} />
+          <span>Product Catalog</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('customizer')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs uppercase tracking-widest font-bold transition-all duration-300 ${
+            activeTab === 'customizer'
+              ? 'bg-brand-mocha dark:bg-brand-gold text-brand-cream dark:text-brand-mocha shadow-md'
+              : 'text-brand-mocha/65 dark:text-brand-cream/65 hover:bg-brand-sand/50 dark:hover:bg-brand-espresso/50'
+          }`}
+        >
+          <Settings size={14} />
+          <span>Website Customizer</span>
+        </button>
+      </div>
+
+      {activeTab === 'catalog' ? (
+        <>
+          {/* Metrics Row */}
+          <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         
         <div className="glass-panel p-5 rounded-3xl border border-brand-mocha/5 dark:border-brand-latte/5 flex items-center space-x-4">
           <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-2xl">
@@ -477,6 +608,192 @@ export default function Admin({ onNavigateHome }) {
           </table>
         </div>
       </div>
+      </>
+      ) : (
+        <div className="max-w-7xl mx-auto space-y-8 font-sans">
+          
+          <div className="glass-panel border border-brand-mocha/5 dark:border-brand-latte/5 rounded-[2.5rem] p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="font-serif text-2xl font-bold text-brand-mocha dark:text-brand-cream">
+                  Website Customizer
+                </h2>
+                <p className="text-xs text-brand-mocha/50 dark:text-brand-cream/50 mt-0.5">
+                  Seamlessly personalize showcase images, looping videos, categories and Instagram feed layouts globally.
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-3 w-full sm:w-auto">
+                <button
+                  onClick={handleResetCustomizer}
+                  disabled={savingCustomizer}
+                  className="w-full sm:w-auto px-5 py-3 border border-brand-mocha/10 rounded-2xl text-xs uppercase tracking-widest font-bold hover:bg-brand-sand dark:hover:bg-brand-cocoa transition-all duration-300 flex items-center justify-center space-x-2 text-brand-mocha/70 dark:text-brand-cream/70"
+                >
+                  <RefreshCw size={14} className={savingCustomizer ? "animate-spin" : ""} />
+                  <span>Reset to Defaults</span>
+                </button>
+                <button
+                  onClick={handleSaveCustomizer}
+                  disabled={savingCustomizer}
+                  className="w-full sm:w-auto px-6 py-3.5 bg-brand-mocha dark:bg-brand-gold text-brand-cream dark:text-brand-mocha rounded-2xl text-xs uppercase tracking-widest font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-2"
+                >
+                  {savingCustomizer ? (
+                    <div className="animate-spin w-4 h-4 border-2 border-brand-cream dark:border-brand-mocha rounded-full border-t-transparent" />
+                  ) : (
+                    <>
+                      <Check size={14} />
+                      <span>Save Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Customizer Subgroups */}
+            <div className="space-y-12">
+              {customizerSections.map((section, sIdx) => (
+                <div key={section.title} className="border-t border-brand-mocha/15 dark:border-brand-cream/10 pt-8 first:border-t-0 first:pt-0">
+                  <div className="mb-6">
+                    <h3 className="font-serif text-lg font-bold text-brand-mocha dark:text-brand-cream flex items-center space-x-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
+                      <span>{section.title}</span>
+                    </h3>
+                    <p className="text-[11px] text-brand-mocha/50 dark:text-brand-cream/50 mt-0.5">
+                      {section.desc}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {section.fields.map((field) => {
+                      const currentVal = customizerImages[field.key] || '';
+                      const isFieldVideo = field.key === 'hero_video' && (currentVal.includes('.mp4') || currentVal.includes('.webm') || currentVal.includes('video') || currentVal.startsWith('data:video/'));
+                      const isUploading = uploadingField === field.key;
+
+                      return (
+                        <div
+                          key={field.key}
+                          className="glass-panel border border-brand-mocha/5 dark:border-brand-latte/5 rounded-3xl p-5 hover:border-brand-gold/25 transition-all duration-300 flex flex-col sm:flex-row gap-5 items-center sm:items-stretch group animate-fade-in"
+                        >
+                          {/* Visual Live Preview */}
+                          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-brand-gold/15 flex-shrink-0 bg-brand-sand/35 dark:bg-brand-espresso/30 flex items-center justify-center">
+                            {isUploading ? (
+                              <div className="animate-spin w-6 h-6 border-2 border-brand-gold rounded-full border-t-transparent" />
+                            ) : currentVal ? (
+                              isFieldVideo ? (
+                                <video
+                                  src={currentVal}
+                                  muted
+                                  loop
+                                  autoPlay
+                                  playsInline
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <img
+                                  src={currentVal}
+                                  alt={field.label}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                  onError={(e) => {
+                                    e.target.src = "/clay-charms.png";
+                                  }}
+                                />
+                              )
+                            ) : (
+                              <Image size={24} className="text-brand-mocha/20 dark:text-brand-cream/20" />
+                            )}
+
+                            {/* Fullscreen hover review button */}
+                            {currentVal && !isUploading && (
+                              <a
+                                href={currentVal}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-300 cursor-pointer"
+                                title="Open full size"
+                              >
+                                <Eye size={18} />
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Settings controls */}
+                          <div className="flex-1 flex flex-col justify-between w-full font-sans">
+                            <div>
+                              <h4 className="text-xs uppercase tracking-widest font-bold text-brand-mocha dark:text-brand-cream">
+                                {field.label}
+                              </h4>
+                              <p className="text-[10px] text-brand-mocha/50 dark:text-brand-cream/50 mt-0.5 leading-snug font-sans font-light">
+                                {field.desc}
+                              </p>
+                            </div>
+
+                            <div className="mt-3 flex gap-2">
+                              {/* Direct URL input */}
+                              <input
+                                type="text"
+                                value={currentVal}
+                                onChange={(e) => handleCustomizerUrlChange(field.key, e.target.value)}
+                                placeholder="Paste asset image URL or file path..."
+                                className="flex-1 bg-brand-cream/40 dark:bg-brand-espresso/40 border border-brand-mocha/10 dark:border-brand-latte/10 rounded-xl px-3 py-2 text-xs text-brand-mocha dark:text-brand-cream outline-none focus:border-brand-gold transition-colors font-sans"
+                              />
+
+                              {/* Direct media file loader */}
+                              <div className="relative">
+                                <input
+                                  type="file"
+                                  accept={field.key === 'hero_video' ? "video/*,image/*" : "image/*"}
+                                  onChange={(e) => handleCustomizerFileChange(field.key, e.target.files?.[0])}
+                                  id={`file-picker-${field.key}`}
+                                  className="hidden"
+                                  disabled={isUploading}
+                                />
+                                <label
+                                  htmlFor={`file-picker-${field.key}`}
+                                  className={`p-2 rounded-xl border border-brand-mocha/10 bg-brand-sand dark:bg-brand-cocoa text-brand-mocha dark:text-brand-cream hover:border-brand-gold hover:text-brand-gold transition-all duration-300 flex items-center justify-center cursor-pointer ${
+                                    isUploading ? "opacity-50 pointer-events-none" : ""
+                                  }`}
+                                  title="Upload from device"
+                                >
+                                  <UploadCloud size={14} />
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom Actions Banner */}
+            <div className="mt-12 pt-8 border-t border-brand-mocha/15 dark:border-brand-cream/10 flex items-center justify-end gap-4">
+              <button
+                onClick={handleResetCustomizer}
+                disabled={savingCustomizer}
+                className="px-6 py-3 border border-brand-mocha/10 rounded-2xl text-xs uppercase tracking-widest font-bold hover:bg-brand-sand dark:hover:bg-brand-cocoa transition-all duration-300 text-brand-mocha/70 dark:text-brand-cream/70"
+              >
+                Reset to Defaults
+              </button>
+              <button
+                onClick={handleSaveCustomizer}
+                disabled={savingCustomizer}
+                className="px-8 py-4 bg-brand-mocha dark:bg-brand-gold text-brand-cream dark:text-brand-mocha rounded-2xl text-xs uppercase tracking-widest font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center space-x-2"
+              >
+                {savingCustomizer ? (
+                  <div className="animate-spin w-4 h-4 border-2 border-brand-cream dark:border-brand-mocha rounded-full border-t-transparent" />
+                ) : (
+                  <>
+                    <Check size={14} />
+                    <span>Synchronize Custom Images</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD/EDIT FORM DRAWER MODAL OVERLAY */}
       <AnimatePresence>
