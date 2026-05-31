@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Instagram } from 'lucide-react';
+import { useProducts } from '../context/ProductContext';
 
 export default function Hero() {
   const canvasRef = useRef(null);
+  const { siteImages } = useProducts();
 
   // Floating gold dust particle effect on canvas
   useEffect(() => {
@@ -69,6 +71,8 @@ export default function Hero() {
     document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const isVideo = siteImages.hero_video?.includes('.mp4') || siteImages.hero_video?.includes('.webm') || siteImages.hero_video?.includes('video') || siteImages.hero_video?.startsWith('data:video/');
+
   return (
     <section id="home" className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-brand-cream dark:bg-brand-espresso">
       
@@ -78,18 +82,26 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-b from-brand-cream/50 via-brand-cream/70 to-brand-cream dark:from-brand-espresso/40 dark:via-brand-espresso/60 dark:to-brand-espresso z-10" />
         <div className="absolute inset-0 bg-brand-mocha/5 dark:bg-brand-cream/[0.02] backdrop-blur-xs z-10" />
         
-        {/* HTML5 autoloop video */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover scale-105 select-none pointer-events-none opacity-85 dark:opacity-60 saturate-[0.85] contrast-[0.95]"
-        >
-          {/* A high-end aesthetic looping craft-focused visual */}
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-handmoulding-clay-pottery-details-close-up-42299-large.mp4" type="video/mp4" />
-          Your browser does not support HTML5 video loops.
-        </video>
+        {/* HTML5 autoloop video or fallback image */}
+        {isVideo ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={siteImages.hero_fallback_image}
+            className="w-full h-full object-cover scale-105 select-none pointer-events-none opacity-85 dark:opacity-60 saturate-[0.85] contrast-[0.95]"
+          >
+            <source src={siteImages.hero_video} type="video/mp4" />
+            Your browser does not support HTML5 video loops.
+          </video>
+        ) : (
+          <img
+            src={siteImages.hero_video || siteImages.hero_fallback_image}
+            alt="Artisanal craft backdrop"
+            className="w-full h-full object-cover scale-105 select-none pointer-events-none opacity-85 dark:opacity-60 saturate-[0.85] contrast-[0.95]"
+          />
+        )}
       </div>
 
       {/* 2. Interactive Gold Canvas Particles */}
