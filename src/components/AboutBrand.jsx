@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Compass, Sparkles } from 'lucide-react';
+import { useProducts } from '../context/ProductContext';
 
 export default function AboutBrand() {
+  const { siteImages } = useProducts();
+
   return (
     <section id="about" className="py-24 bg-brand-cream/30 dark:bg-brand-cocoa/10 relative overflow-hidden">
       
@@ -24,7 +27,7 @@ export default function AboutBrand() {
               className="relative w-72 sm:w-96 aspect-[3/4] rounded-[3rem] overflow-hidden border border-brand-gold/15 shadow-2xl z-10"
             >
               <img
-                src="/public/clay-charms.png"
+                src={siteImages.about_primary}
                 alt="Artist Handcrafting Clay"
                 className="w-full h-full object-cover filter saturate-[0.9] dark:opacity-90"
               />
@@ -40,7 +43,7 @@ export default function AboutBrand() {
               className="absolute right-2 bottom-[-30px] w-48 sm:w-60 aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-brand-gold/20 shadow-xl hidden sm:block z-20"
             >
               <img
-                src="/public/dashboard-decor.png"
+                src={siteImages.about_secondary}
                 alt="Clay details close up"
                 className="w-full h-full object-cover filter saturate-[0.95]"
               />
