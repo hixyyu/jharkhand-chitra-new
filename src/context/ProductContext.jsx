@@ -3,11 +3,31 @@ import { dbService } from '../firebase/config';
 
 const ProductContext = createContext();
 
+const defaultSiteImages = {
+  about_primary: "/clay-charms.png",
+  about_secondary: "/dashboard-decor.png",
+  category_clay_charms: "/clay-charms.png",
+  category_keyrings: "/keyrings.png",
+  category_dashboard_decor: "/dashboard-decor.png",
+  category_earrings: "/earrings.png",
+  category_custom_pins: "/custom-pins.png",
+  category_flags: "/flags.png",
+  insta_post_1: "/clay-charms.png",
+  insta_post_2: "/keyrings.png",
+  insta_post_3: "/dashboard-decor.png",
+  insta_post_4: "/earrings.png",
+  insta_post_5: "/custom-pins.png",
+  insta_post_6: "/flags.png",
+  hero_video: "https://assets.mixkit.co/videos/preview/mixkit-handmoulding-clay-pottery-details-close-up-42299-large.mp4",
+  hero_fallback_image: "/clay-charms.png"
+};
+
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [siteImages, setSiteImages] = useState(defaultSiteImages);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -21,8 +41,18 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+  const fetchSiteImages = async () => {
+    try {
+      const fetched = await dbService.getSiteImages();
+      setSiteImages({ ...defaultSiteImages, ...fetched });
+    } catch (err) {
+      console.error("Error fetching site images:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchSiteImages();
   }, []);
 
   const addProduct = async (productData) => {
@@ -67,6 +97,17 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+  const updateSiteImages = async (newSiteImages) => {
+    try {
+      const updated = await dbService.saveSiteImages(newSiteImages);
+      setSiteImages({ ...defaultSiteImages, ...updated });
+      return updated;
+    } catch (err) {
+      console.error("Error saving site images:", err);
+      throw err;
+    }
+  };
+
   // Perform search and filter locally
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
@@ -91,6 +132,9 @@ export const ProductProvider = ({ children }) => {
         updateProduct,
         deleteProduct,
         uploadMedia,
+        siteImages,
+        updateSiteImages,
+        defaultSiteImages,
         isMock: dbService.isMock
       }}
     >
