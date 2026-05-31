@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // Check if Firebase environment variables are configured
@@ -52,7 +52,7 @@ const initialMockProducts = [
     description: "An elegant, handcrafted clay charm displaying traditional Ganesha artistry. Perfectly baked, coated in weather-resistant clear resin, and accented with golden highlights.",
     price: 499,
     discount: 15,
-    images: ["/public/clay-charms.png"],
+    images: ["/clay-charms.png"],
     video: "",
     category: "Clay Charms",
     stockStatus: "in-stock",
@@ -66,7 +66,7 @@ const initialMockProducts = [
     description: "A gorgeous, circular keyring carved with delicate tribal patterns. Hand-painted in soft cream and mocha beige, and adorned with traditional woolen tassels.",
     price: 299,
     discount: 10,
-    images: ["/public/keyrings.png"],
+    images: ["/keyrings.png"],
     video: "",
     category: "Keyrings",
     stockStatus: "in-stock",
@@ -80,7 +80,7 @@ const initialMockProducts = [
     description: "Indulge your drive with this handcrafted clay miniature dashboard set. Inspired by traditional Jharkhand earthen pots, finished in a luxury ceramic smooth glow.",
     price: 899,
     discount: 20,
-    images: ["/public/dashboard-decor.png"],
+    images: ["/dashboard-decor.png"],
     video: "",
     category: "Dashboard Decor",
     stockStatus: "in-stock",
@@ -94,7 +94,7 @@ const initialMockProducts = [
     description: "Premium handcrafted lightweight clay earrings. Handmoulded patterns featuring abstract leaf lines that seamlessly bring ethnic aesthetics to contemporary apparel.",
     price: 399,
     discount: 5,
-    images: ["/public/earrings.png"],
+    images: ["/earrings.png"],
     video: "",
     category: "Earrings",
     stockStatus: "in-stock",
@@ -108,7 +108,7 @@ const initialMockProducts = [
     description: "Handcrafted copper-baked clay pins displaying the iconic Sohrai art. Ideal to accent jackets, laptop bags, and key straps for the modern aesthetic enthusiast.",
     price: 349,
     discount: 0,
-    images: ["/public/custom-pins.png"],
+    images: ["/custom-pins.png"],
     video: "",
     category: "Custom Pins",
     stockStatus: "in-stock",
@@ -122,7 +122,7 @@ const initialMockProducts = [
     description: "A compact, premium terracotta dashboard flag holder with an intricate national theme, mounted on an elegant high-quality mahogany-colored support.",
     price: 599,
     discount: 25,
-    images: ["/public/flags.png"],
+    images: ["/flags.png"],
     video: "",
     category: "Car & Bike Flags",
     stockStatus: "out-of-stock",
@@ -261,6 +261,38 @@ export const dbService = {
       reader.onerror = (err) => reject(err);
       reader.readAsDataURL(file);
     });
+  },
+
+  // Get custom site images
+  getSiteImages: async () => {
+    if (!isMock) {
+      try {
+        const docRef = doc(firestoreDb, 'settings', 'site_images');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          return docSnap.data();
+        }
+      } catch (err) {
+        console.error("Firestore getSiteImages error:", err);
+      }
+    }
+    const stored = localStorage.getItem("jc_site_images");
+    return stored ? JSON.parse(stored) : {};
+  },
+
+  // Save custom site images
+  saveSiteImages: async (imagesData) => {
+    if (!isMock) {
+      try {
+        const docRef = doc(firestoreDb, 'settings', 'site_images');
+        await setDoc(docRef, imagesData);
+        return imagesData;
+      } catch (err) {
+        console.error("Firestore saveSiteImages error:", err);
+      }
+    }
+    localStorage.setItem("jc_site_images", JSON.stringify(imagesData));
+    return imagesData;
   },
 
   // Auth Operations
