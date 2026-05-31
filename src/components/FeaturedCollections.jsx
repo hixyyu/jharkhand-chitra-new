@@ -4,47 +4,47 @@ import { useProducts } from '../context/ProductContext';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 export default function FeaturedCollections() {
-  const { setSelectedCategory } = useProducts();
+  const { setSelectedCategory, siteImages } = useProducts();
 
   const collections = [
     {
       name: 'Clay Charms',
-      image: '/public/clay-charms.png',
+      image: siteImages.category_clay_charms,
       count: 'Aesthetic Handmoulds',
       glow: 'rgba(212, 163, 115, 0.25)',
       desc: 'Dainty bakes curated for bags & items.'
     },
     {
       name: 'Keyrings',
-      image: '/public/keyrings.png',
+      image: siteImages.category_keyrings,
       count: 'Chic Tassels',
       glow: 'rgba(226, 149, 120, 0.25)',
       desc: 'Tribal Mandala wood & clay lines.'
     },
     {
       name: 'Dashboard Decor',
-      image: '/public/dashboard-decor.png',
+      image: siteImages.category_dashboard_decor,
       count: 'Miniature Sovereign',
       glow: 'rgba(212, 163, 115, 0.25)',
       desc: 'Stunning premium earthen pot decor.'
     },
     {
       name: 'Earrings',
-      image: '/public/earrings.png',
+      image: siteImages.category_earrings,
       count: 'Lightweight Drops',
       glow: 'rgba(226, 149, 120, 0.25)',
       desc: 'Traditional clay drops matching modern wear.'
     },
     {
       name: 'Custom Pins',
-      image: '/public/custom-pins.png',
+      image: siteImages.category_custom_pins,
       count: 'Tribal Sohrai',
       glow: 'rgba(212, 163, 115, 0.25)',
       desc: 'Hand-painted metal backed clay accents.'
     },
     {
       name: 'Car & Bike Flags',
-      image: '/public/flags.png',
+      image: siteImages.category_flags,
       count: 'National Heritage',
       glow: 'rgba(226, 149, 120, 0.25)',
       desc: 'Elegant terracotta mounted bike indicators.'
