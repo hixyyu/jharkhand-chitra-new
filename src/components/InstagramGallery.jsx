@@ -1,47 +1,50 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, Heart, MessageCircle, Play, Sparkles } from 'lucide-react';
+import { useProducts } from '../context/ProductContext';
 
 export default function InstagramGallery() {
+  const { siteImages } = useProducts();
+
   const feed = [
     {
       id: 1,
-      image: '/public/clay-charms.png',
+      image: siteImages.insta_post_1,
       likes: '1,424',
       comments: '112',
       isReel: true
     },
     {
       id: 2,
-      image: '/public/keyrings.png',
+      image: siteImages.insta_post_2,
       likes: '890',
       comments: '64',
       isReel: false
     },
     {
       id: 3,
-      image: '/public/dashboard-decor.png',
+      image: siteImages.insta_post_3,
       likes: '2,105',
       comments: '189',
       isReel: true
     },
     {
       id: 4,
-      image: '/public/earrings.png',
+      image: siteImages.insta_post_4,
       likes: '1,201',
       comments: '78',
       isReel: false
     },
     {
       id: 5,
-      image: '/public/custom-pins.png',
+      image: siteImages.insta_post_5,
       likes: '960',
       comments: '53',
       isReel: true
     },
     {
       id: 6,
-      image: '/public/flags.png',
+      image: siteImages.insta_post_6,
       likes: '1,840',
       comments: '142',
       isReel: true
